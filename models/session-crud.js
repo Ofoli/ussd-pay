@@ -1,4 +1,5 @@
 const fsPromises = require("fs/promises");
+const { SUCCESS_STATUS, FAILED_STATUS } = require("../data/constants");
 const {
   getSessionPath,
   findSession,
@@ -9,19 +10,22 @@ async function createSession(sessionId) {
   const timeStamp = JSON.stringify(new Date()).slice(1, 11);
   const key = `${sessionId}_${timeStamp}`;
   const sessionStorePath = getSessionPath(`${key}.txt`);
-  const response = await persistSessionData(sessionStorePath, { sessionId });
+  const response = await persistSessionData(sessionStorePath, {
+    sessionId,
+    data: ["*920*411"],
+  });
   return response;
 }
 function getSession(sessionId) {
   const sessionData = findSession(sessionId);
-  if (sessionData.status) return sessionData;
+  if (sessionData.status === FAILED_STATUS) return sessionData;
   return sessionData.session;
 }
 async function updateSession(sessionData) {
   const { sessionId } = sessionData;
   const findResponse = findSession(sessionId);
 
-  if (findResponse.status) return findResponse;
+  if (findResponse.status === FAILED_STATUS) return findResponse;
 
   const { session, sessionFullPath } = findResponse;
   const updatedSession = { ...session, ...sessionData };
@@ -35,18 +39,7 @@ async function deleteSession(sessionId) {
   const sessionData = findSession(sessionId);
   if (sessionData.status) return sessionData;
   await fsPromises.rm(sessionData.sessionFullPath);
-  return { status: "SUCCESS", message: "Session data deleted" };
+  return { status: SUCCESS_STATUS, message: "Session data deleted" };
 }
 
-const test = async () => {
-  const sessionId = "mytestsession";
-  const createRes = await createSession(sessionId);
-  console.log({ GET_SESSION_00: getSession(sessionId) });
-  const updateRes = await updateSession({ sessionId, number: "7827645378345" });
-  console.log({ GET_SESSION_01: getSession(sessionId) });
-
-  console.log({ DELETE_SESSION: await deleteSession(sessionId) });
-  //   console.log(session);
-};
-
-test();
+module.exports = { createSession, getSession, updateSession, deleteSession };

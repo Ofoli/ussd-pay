@@ -1,6 +1,7 @@
 const path = require("path");
 const fs = require("fs");
 const fsPromises = require("fs/promises");
+const { SUCCESS_STATUS, FAILED_STATUS } = require("../data/constants");
 
 const sessionDirPath = path.join(__dirname, "..", "sessions");
 const getSessionPath = (key) => path.join(__dirname, "..", "sessions", key);
@@ -15,7 +16,16 @@ const getAllSessionFiles = () => {
 };
 const findSession = (sessionId) => {
   const { error, data } = getAllSessionFiles();
-  if (error) return { status: "FAILED", message: data };
+
+  if (error || data.length === 0) {
+    const err = error ? error : "Session Not Found";
+    return {
+      status: FAILED_STATUS,
+      session: null,
+      sessionFullPath: "",
+      message: err,
+    };
+  }
 
   const sessionFileName = data.find((file) => file.split("_")[0] === sessionId);
   const sessionFullPath = getSessionPath(sessionFileName);
@@ -23,15 +33,15 @@ const findSession = (sessionId) => {
   const sessionText = fs.readFileSync(sessionFullPath);
   const session = JSON.parse(sessionText);
 
-  return { session, sessionFullPath };
+  return { status: SUCCESS_STATUS, session, sessionFullPath, message: "" };
 };
 const persistSessionData = async (filePath, data) => {
   const session = createSessionData(data);
   try {
     await fsPromises.writeFile(filePath, session);
-    return { message: "SUCCESS" };
+    return { status: SUCCESS_STATUS };
   } catch (err) {
-    return { message: err.message };
+    return { status: FAILED_STATUS, message: err.message };
   }
 };
 
