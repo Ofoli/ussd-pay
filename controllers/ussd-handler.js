@@ -6,6 +6,21 @@ const {
 } = require("../models/session-crud");
 const { SUCCESS_STATUS, FAILED_STATUS } = require("../data/constants");
 
+const DONATION_TYPES = ["offering", "tithe", "thanksgiving", "donation"];
+const MESSAGES = {
+  STAGE_ONE: "Welcome to luxstek payment collector.\nPlease enter your name",
+  STAGE_TWO:
+    "Select contribution type\n 1.Offering\n 2.Tithes\n 3.Thanksgiving\n 4.Donation",
+  STAGE_THREE: (type) => `Enter ${type} amount`,
+  STAGE_FOUR: (type, amount) =>
+    `You are about to pay GHS ${amount} as ${type} to luxstek.\n 1.Confirm\n 2.Cancel`,
+  STAGE_FIVE: {
+    cancel: "You have terminated the contribution process",
+    proceed:
+      "Thank you for your contribution. Kindly approve the next popup to make the payment.",
+  },
+};
+
 const handleUSSDRequests = async (req, res) => {
   const { MSGTYPE } = req.body;
   if (MSGTYPE) return await handleInitialDials(req, res);
@@ -21,7 +36,7 @@ const handleInitialDials = async (req, res) => {
   const response = {
     USERID: USERID,
     MSISDN: MSISDN,
-    MSG: "Welcome to My USSD App.\nPlease enter your name",
+    MSG: MESSAGES.STAGE_ONE,
     MSGTYPE: true,
   };
   return res.json(response);
@@ -45,23 +60,39 @@ const handleSubsequentDials = async (req, res) => {
   const response = {
     USERID: USERID,
     MSISDN: MSISDN,
-    MSG: "",
+    MSG: "Not Allowed",
     MSGTYPE: false,
   };
 
   switch (sessionData.data.length) {
     case 1: {
-      const message = "How are you feeling?";
+      const message = MESSAGES.STAGE_TWO;
       return res.json({ ...response, MSG: message });
     }
     case 2: {
-      const name = sessionData.data[1];
-      const feeling = USERDATA;
-      const message = `Dear ${name}, you are feeling ${feeling}`;
-      return res.json({ ...response, MSG: message, MSGTYPE: true });
+      const userOption = parseInt(USERDATA);
+      const donationType = DONATION_TYPES[userOption - 1];
+      const message = MESSAGES.STAGE_THREE(donationType);
+      return res.json({ ...response, MSG: message });
+    }
+    case 3: {
+      const userOption = parseInt(sessionData.data[2]);
+      const donationType = DONATION_TYPES[userOption - 1];
+      const amount = USERDATA;
+      const message = MESSAGES.STAGE_FOUR(donationType, amount);
+      return res.json({ ...response, MSG: message });
+    }
+    case 4: {
+      const proceedWithPayment = USERDATA === "1";
+      const message = MESSAGES.STAGE_FIVE;
+      if (proceedWithPayment) {
+        //call the payment api here
+        return res.json({ ...response, MSG: message.proceed, MSGTYPE: true });
+      }
+      return res.json({ ...response, MSG: message.cancel, MSGTYPE: true });
     }
     default:
-      return res.status(500).send({ message: "This is not possible" });
+      return res.json({ ...response, MSGTYPE: true });
   }
 };
 
