@@ -5,6 +5,7 @@ const {
   deleteSession,
 } = require("../models/session-crud");
 const { SUCCESS_STATUS, FAILED_STATUS } = require("../data/constants");
+const validateUserData = require("../utils/validator");
 
 const DONATION_TYPES = ["offering", "tithe", "thanksgiving", "donation"];
 const MESSAGES = {
@@ -44,10 +45,21 @@ const handleInitialDials = async (req, res) => {
 
 const handleSubsequentDials = async (req, res) => {
   const { SESSIONID, USERID, MSISDN, USERDATA } = req.body;
+  const response = {
+    USERID: USERID,
+    MSISDN: MSISDN,
+    MSG: "Not Allowed",
+    MSGTYPE: true,
+  };
 
   const sessionData = getSession(SESSIONID);
   if (sessionData.status === FAILED_STATUS) console.log(FAILED_STATUS);
 
+  //validate userdata
+  const validate = validateUserData(sessionData.data.length, USERDATA);
+  if (validate.error) {
+    return res.json({ ...response, MSG: validate.message, MSGTYPE: false });
+  }
   //update session data
   const updatedData = [...sessionData.data, USERDATA];
   const updatedSessionData = { ...sessionData, data: updatedData };
@@ -56,13 +68,6 @@ const handleSubsequentDials = async (req, res) => {
   if (updateResponse.status === FAILED_STATUS) {
     console.log("SESSION_UPDATED_FAILED", updateResponse.message);
   }
-
-  const response = {
-    USERID: USERID,
-    MSISDN: MSISDN,
-    MSG: "Not Allowed",
-    MSGTYPE: true,
-  };
 
   switch (sessionData.data.length) {
     case 1: {
