@@ -61,7 +61,7 @@ const handleSubsequentDials = async (req, res) => {
     USERID: USERID,
     MSISDN: MSISDN,
     MSG: "Not Allowed",
-    MSGTYPE: false,
+    MSGTYPE: true,
   };
 
   switch (sessionData.data.length) {
@@ -87,12 +87,12 @@ const handleSubsequentDials = async (req, res) => {
       const message = MESSAGES.STAGE_FIVE;
       if (proceedWithPayment) {
         //call the payment api here
-        return res.json({ ...response, MSG: message.proceed, MSGTYPE: true });
+        return res.json({ ...response, MSG: message.proceed, MSGTYPE: false });
       }
-      return res.json({ ...response, MSG: message.cancel, MSGTYPE: true });
+      return res.json({ ...response, MSG: message.cancel, MSGTYPE: false });
     }
     default:
-      return res.json({ ...response, MSGTYPE: true });
+      return res.json({ ...response, MSGTYPE: false });
   }
 };
 
