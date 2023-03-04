@@ -58,6 +58,7 @@ const handleSubsequentDials = async (req, res) => {
   //validate userdata
   const validate = validateUserData(sessionData.data.length, USERDATA);
   if (validate.error) {
+    await deleteSession(SESSIONID);
     return res.json({ ...response, MSG: validate.message, MSGTYPE: false });
   }
   //update session data
@@ -90,6 +91,7 @@ const handleSubsequentDials = async (req, res) => {
     case 4: {
       const proceedWithPayment = USERDATA === "1";
       const message = MESSAGES.STAGE_FIVE;
+      await deleteSession(SESSIONID);
       if (proceedWithPayment) {
         //call the payment api here
         return res.json({ ...response, MSG: message.proceed, MSGTYPE: false });
@@ -97,6 +99,7 @@ const handleSubsequentDials = async (req, res) => {
       return res.json({ ...response, MSG: message.cancel, MSGTYPE: false });
     }
     default:
+      await deleteSession(SESSIONID);
       return res.json({ ...response, MSGTYPE: false });
   }
 };
