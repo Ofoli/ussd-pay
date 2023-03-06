@@ -4,6 +4,7 @@ const {
   getSessionPath,
   findSession,
   persistSessionData,
+  addSessionToDelete,
 } = require("../utils/sessions");
 
 async function createSession(sessionId) {
@@ -37,9 +38,11 @@ async function updateSession(sessionData) {
 }
 async function deleteSession(sessionId) {
   const sessionData = findSession(sessionId);
-  if (sessionData.status) return sessionData;
+  if (sessionData.status) {
+    await addSessionToDelete(sessionData.sessionFullPath);
+    return;
+  }
   await fsPromises.rm(sessionData.sessionFullPath);
-  return { status: SUCCESS_STATUS, message: "Session data deleted" };
 }
 
 module.exports = { createSession, getSession, updateSession, deleteSession };
