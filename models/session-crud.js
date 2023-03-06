@@ -38,7 +38,7 @@ async function updateSession(sessionData) {
 }
 async function deleteSession(sessionId) {
   const sessionData = findSession(sessionId);
-  if (sessionData.status) {
+  if (sessionData.status === FAILED_STATUS) {
     await addSessionToDelete(sessionData.sessionFullPath);
     return;
   }

@@ -4,7 +4,6 @@ const fsPromises = require("fs/promises");
 const { SUCCESS_STATUS, FAILED_STATUS } = require("../data/constants");
 
 const sessionDirPath = path.join(__dirname, "..", "sessions");
-const errorSessionDirPath = path.join(__dirname, "..", "sessions_to_delete");
 const getSessionPath = (key) => path.join(__dirname, "..", "sessions", key);
 const createSessionData = (data) => JSON.stringify(data);
 const getAllSessionFiles = () => {
@@ -48,9 +47,10 @@ const persistSessionData = async (filePath, data) => {
 
 const addSessionToDelete = async (path) => {
   try {
-    await fsPromises.writeFile(errorSessionDirPath, path);
+    const filePath = getSessionPath("sessions_to_delete");
+    await fsPromises.writeFile(filePath, path);
   } catch (err) {
-    return console.log("Unable to save session path");
+    return console.log("Unable to save session path", err.message);
   }
 };
 module.exports = {
