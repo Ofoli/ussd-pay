@@ -16,8 +16,9 @@ const getAllSessionFiles = () => {
 };
 const findSession = (sessionId) => {
   const { error, data } = getAllSessionFiles();
+  const isSessionFile = (file) => !file.includes("delete");
 
-  if (error || data.length === 0) {
+  if (error || data.filter(isSessionFile).length === 0) {
     const err = error ? error : "Session Not Found";
     return {
       status: FAILED_STATUS,
@@ -47,7 +48,7 @@ const persistSessionData = async (filePath, data) => {
 
 const addSessionToDelete = async (path) => {
   try {
-    const filePath = getSessionPath("sessions_to_delete");
+    const filePath = getSessionPath("sessions_to_delete.txt");
     await fsPromises.writeFile(filePath, path);
   } catch (err) {
     return console.log("Unable to save session path", err.message);
