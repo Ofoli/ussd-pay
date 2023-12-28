@@ -6,7 +6,7 @@ const { format } = require("date-fns");
 async function logger(message, filename) {
   const timeStamp = `${format(new Date(), "yyyy-MM-dd\tHH:mm:ss")}`;
   const logMessage = `${timeStamp}\t${message}\n`;
-  const dirPath = path.join(__dirname, "..", "logs");
+  const dirPath = path.join(__dirname, "..", "..", "logs");
   const logPath = path.join(dirPath, filename);
 
   try {
