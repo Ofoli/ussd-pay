@@ -1,5 +1,7 @@
+require("dotenv").config();
+
 const USSD_ENPOINT = "/ussd/app";
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 8001;
 
 const SUCCESS_STATUS = "SUCCESS";
 const FAILED_STATUS = "FAILED";
