@@ -17,11 +17,13 @@ async function createSession(sessionId) {
   });
   return response;
 }
+
 function getSession(sessionId) {
   const sessionData = findSession(sessionId);
   if (sessionData.status === FAILED_STATUS) return sessionData;
   return sessionData.session;
 }
+
 async function updateSession(sessionData) {
   const { sessionId } = sessionData;
   const findResponse = findSession(sessionId);

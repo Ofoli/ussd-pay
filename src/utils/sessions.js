@@ -3,8 +3,8 @@ const fs = require("fs");
 const fsPromises = require("fs/promises");
 const { SUCCESS_STATUS, FAILED_STATUS } = require("../data/constants");
 
-const sessionDirPath = path.join(__dirname, "..", "sessions");
-const getSessionPath = (key) => path.join(__dirname, "..", "sessions", key);
+const sessionDirPath = path.join(__dirname, "..", "..", "sessions");
+const getSessionPath = (key) => path.join(sessionDirPath, key);
 const createSessionData = (data) => JSON.stringify(data);
 const getAllSessionFiles = () => {
   try {
