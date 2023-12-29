@@ -13,7 +13,6 @@ const generateKey = () => {
   return digits.join("");
 };
 
-// console.log(process.env);
 const createMD5Hash = (str) => {
   const md5Hash = crypto.createHash("md5");
   md5Hash.update(str, "utf-8");
@@ -30,7 +29,8 @@ const generateSecrete = (key) => {
   return secrete;
 };
 const getCallbackEndpoint = () => {
-  let base = BASE_URL_DEV + process.env.PORT;
+  // let base = BASE_URL_DEV + process.env.PORT;
+  let base = BASE_URL_PROD;
   if (process.env.NODE_ENV === "production") base = BASE_URL_PROD;
   return base + PAYMENT_CALLBACK_ENDPOINT;
 };
@@ -59,4 +59,18 @@ const generatePaymentPayload = (data) => {
   };
 };
 
-module.exports = { generatePaymentPayload };
+const formatCallbackResponse = (data) => {
+  const { Timestamp, InvoiceNo, Order_id, Status } = data;
+  return {
+    updatedAt: Timestamp,
+    createdAt: Timestamp,
+    invoice: InvoiceNo,
+    orderId: Order_id,
+    status: Status,
+  };
+};
+
+module.exports = {
+  generatePaymentPayload,
+  formatCallbackResponse,
+};

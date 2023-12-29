@@ -3,3 +3,5 @@ node_modules
 sessions
 sessions_to_delete
 logs
+transactions
+transactions.json

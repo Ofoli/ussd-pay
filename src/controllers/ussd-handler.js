@@ -6,7 +6,7 @@ const {
 } = require("../models/session-crud");
 const { SUCCESS_STATUS, FAILED_STATUS } = require("../data/constants");
 const validateUserData = require("../utils/validator");
-const {} = require("./payment-handler");
+const { firePayment } = require("./payment-handler");
 
 const DONATION_TYPES = ["offering", "tithe", "thanksgiving", "donation"];
 const MESSAGES = {
@@ -45,7 +45,7 @@ const handleInitialDials = async (req, res) => {
 };
 
 const handleSubsequentDials = async (req, res) => {
-  const { SESSIONID, USERID, MSISDN, USERDATA } = req.body;
+  const { SESSIONID, USERID, MSISDN, USERDATA, NETWORK } = req.body;
 
   const response = {
     USERID: USERID,
@@ -102,7 +102,16 @@ const handleSubsequentDials = async (req, res) => {
       });
 
       if (proceedWithPayment) {
-        return console.log("proceeding with payment...");
+        const [_, customer, donationIdx, amount] = updatedData;
+        const donation = DONATION_TYPES[donationIdx - 1];
+        const paymentData = {
+          amount,
+          name: `Luxstek_${customer}`,
+          description: `Luxstek ${donation} contribution`,
+          number: MSISDN,
+          network: NETWORK,
+        };
+        return await firePayment(paymentData);
       }
 
       break;

@@ -2,7 +2,13 @@ const fsPromises = require("fs/promises");
 const path = require("path");
 const { SUCCESS_STATUS, FAILED_STATUS } = require("../data/constants");
 
-const DB_PATH = path.join(__dirname, "..", "data", "transactions.json");
+const DB_PATH = path.join(
+  __dirname,
+  "..",
+  "..",
+  "transactions",
+  "transactions.json"
+);
 
 const getTransactions = async () => {
   const transactions = await fsPromises.readFile(DB_PATH, { encoding: "utf8" });
@@ -23,14 +29,13 @@ const addTransaction = async (data) => {
 
 const updateTransaction = async (data) => {
   try {
+    const { updatedAt, status, invoice } = data;
     const transactions = await getTransactions();
-    const transaction = transactions.find(
-      ({ invoice }) => invoice === data.invoice
-    );
+    const transaction = transactions.find((t) => t.invoice === invoice);
 
     if (!transaction) return { status: FAILED_STATUS, data: "Not Found" };
 
-    const updatedTransaction = { ...transaction, ...data };
+    const updatedTransaction = { ...transaction, updatedAt, status };
     const updatedTransactions = transactions.map((trans) =>
       trans.invoice === data.invoice ? updatedTransaction : trans
     );
