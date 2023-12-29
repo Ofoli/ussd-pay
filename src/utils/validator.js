@@ -1,6 +1,6 @@
 const ERROR_MESSAGES = {
   DEFAULT: "You entered an invalid input",
-  STAGE_ONE: "Name cannot be less than 5 characters",
+  STAGE_ONE: "Name cannot be less than 3 characters",
 };
 
 const PASSED_RESPONSE = { error: false, message: "" };
@@ -21,7 +21,7 @@ function validateUserData(stage, data) {
   return FAILED_RESPONSE;
 }
 
-const isValidLength = (str) => str.length >= 5;
+const isValidLength = (str) => str.length >= 3;
 const isStringedNumber = (str) => !isNaN(str) && !isNaN(parseFloat(str));
 
 module.exports = validateUserData;

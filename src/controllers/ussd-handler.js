@@ -6,6 +6,7 @@ const {
 } = require("../models/session-crud");
 const { SUCCESS_STATUS, FAILED_STATUS } = require("../data/constants");
 const validateUserData = require("../utils/validator");
+const { firePayment } = require("./payment-handler");
 
 const DONATION_TYPES = ["offering", "tithe", "thanksgiving", "donation"];
 const MESSAGES = {
@@ -44,7 +45,8 @@ const handleInitialDials = async (req, res) => {
 };
 
 const handleSubsequentDials = async (req, res) => {
-  const { SESSIONID, USERID, MSISDN, USERDATA } = req.body;
+  const { SESSIONID, USERID, MSISDN, USERDATA, NETWORK } = req.body;
+
   const response = {
     USERID: USERID,
     MSISDN: MSISDN,
@@ -53,7 +55,7 @@ const handleSubsequentDials = async (req, res) => {
   };
 
   const sessionData = getSession(SESSIONID);
-  if (sessionData.status === FAILED_STATUS) console.log(FAILED_STATUS);
+  if (sessionData.status === FAILED_STATUS) return handleInitialDials(req, res);
 
   //validate userdata
   const validate = validateUserData(sessionData.data.length, USERDATA);
@@ -90,13 +92,29 @@ const handleSubsequentDials = async (req, res) => {
     }
     case 4: {
       const proceedWithPayment = USERDATA === "1";
-      const message = MESSAGES.STAGE_FIVE;
+      const { proceed, cancel } = MESSAGES.STAGE_FIVE;
       await deleteSession(SESSIONID);
+
+      res.json({
+        ...response,
+        MSG: proceedWithPayment ? proceed : cancel,
+        MSGTYPE: false,
+      });
+
       if (proceedWithPayment) {
-        //call the payment api here
-        return res.json({ ...response, MSG: message.proceed, MSGTYPE: false });
+        const [_, customer, donationIdx, amount] = updatedData;
+        const donation = DONATION_TYPES[donationIdx - 1];
+        const paymentData = {
+          amount,
+          name: `Luxstek_${customer}`,
+          description: `Luxstek ${donation} contribution`,
+          number: MSISDN,
+          network: NETWORK,
+        };
+        return await firePayment(paymentData);
       }
-      return res.json({ ...response, MSG: message.cancel, MSGTYPE: false });
+
+      break;
     }
     default:
       await deleteSession(SESSIONID);
