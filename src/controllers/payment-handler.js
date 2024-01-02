@@ -1,5 +1,6 @@
 const axios = require("axios");
-const { updateTransaction, addTransaction } = require("../models/payment");
+const Transaction = require("../models/transactions");
+const { updateTransaction } = require("../models/payment");
 const { FAILED_STATUS, NALO_PAYMENT_URL } = require("../data/constants");
 const {
   generatePaymentPayload,
@@ -12,14 +13,13 @@ async function firePayment(data) {
     const { data } = await axios.post(NALO_PAYMENT_URL, payload);
     if (!data.Status) throw new Error(data);
 
-    const transaction = formatCallbackResponse(data);
+    const transactionData = formatCallbackResponse(data);
     const { customerNumber, amount } = payload;
-    const { status, data: addData } = await addTransaction({
-      ...transaction,
+    await Transaction.create({
+      ...transactionData,
       customerNumber,
       amount,
     });
-    if (status === FAILED_STATUS) throw new Error(addData);
   } catch (err) {
     console.log({ PAYMENT_REQUEST_FAILED: err?.response?.data ?? err.message });
   }
