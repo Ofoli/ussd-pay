@@ -26,14 +26,21 @@ async function firePayment(data) {
 }
 
 const handlePaymentCallback = async (req, res) => {
-  const transaction = formatCallbackResponse(req.body);
-  const { status, data } = await updateTransaction(transaction);
+  try {
+    const { status, invoice } = formatCallbackResponse(req.body);
+    const updatedTransaction = await Transaction.findOneAndUpdate(
+      { invoice },
+      { status }
+    );
 
-  if (status === FAILED_STATUS) {
-    return res.status(404).json({ status: FAILED_STATUS, message: data });
+    if (updatedTransaction === null) {
+      return res.status(404).json("Transaction not found!");
+    }
+
+    return res.json("Received");
+  } catch (err) {
+    return res.status(500).json("An Error Occurred!!");
   }
-
-  return res.json("Received");
 };
 
 module.exports = { firePayment, handlePaymentCallback };
