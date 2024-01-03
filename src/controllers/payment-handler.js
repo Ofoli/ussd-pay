@@ -1,7 +1,6 @@
 const axios = require("axios");
 const Transaction = require("../models/transactions");
-const { updateTransaction } = require("../models/payment");
-const { FAILED_STATUS, NALO_PAYMENT_URL } = require("../data/constants");
+const { NALO_PAYMENT_URL } = require("../data/constants");
 const {
   generatePaymentPayload,
   formatCallbackResponse,
