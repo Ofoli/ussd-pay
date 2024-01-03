@@ -1,6 +1,6 @@
 const NALO_PAYMENT_URL = "https://api.nalosolutions.com/payplus/api/";
 const BASE_URL_DEV = "http:/localhost:";
-const BASE_URL_PROD = "https://cdbb-154-160-2-20.ngrok-free.app";
+const BASE_URL_PROD = "https://0cf8-154-160-0-209.ngrok-free.app";
 const USSD_ENPOINT = "/ussd/app";
 const PAYMENT_CALLBACK_ENDPOINT = "/payment/callback";
 
