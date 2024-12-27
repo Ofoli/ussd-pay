@@ -1,20 +1,22 @@
+import { FAILED_STATUS } from "../config/constants";
+import { validateUserData } from "../utils/validator";
+import { firePayment } from "./payment-handler";
+import type { Request, Response } from "express";
+
 const {
   getSession,
   createSession,
   updateSession,
   deleteSession,
 } = require("../models/session-crud");
-const { SUCCESS_STATUS, FAILED_STATUS } = require("../data/constants");
-const validateUserData = require("../utils/validator");
-const { firePayment } = require("./payment-handler");
 
 const DONATION_TYPES = ["offering", "tithe", "thanksgiving", "donation"];
 const MESSAGES = {
   STAGE_ONE: "Welcome to luxstek payment collector.\nPlease enter your name",
   STAGE_TWO:
     "Select contribution type\n 1.Offering\n 2.Tithes\n 3.Thanksgiving\n 4.Donation",
-  STAGE_THREE: (type) => `Enter ${type} amount`,
-  STAGE_FOUR: (type, amount) =>
+  STAGE_THREE: (type: string) => `Enter ${type} amount`,
+  STAGE_FOUR: (type: string, amount: string) =>
     `You are about to pay GHS ${amount} as ${type} to luxstek.\n 1.Confirm\n 2.Cancel`,
   STAGE_FIVE: {
     cancel: "You have terminated the contribution process",
@@ -23,13 +25,13 @@ const MESSAGES = {
   },
 };
 
-const handleUSSDRequests = async (req, res) => {
+export const handleUSSDRequests = async (req: Request, res: Response) => {
   const { MSGTYPE } = req.body;
   if (MSGTYPE) return await handleInitialDials(req, res);
   return await handleSubsequentDials(req, res);
 };
 
-const handleInitialDials = async (req, res) => {
+const handleInitialDials = async (req: Request, res: Response) => {
   const { SESSIONID, USERID, MSISDN } = req.body;
   //create a unique record for the session
   const createResponse = await createSession(SESSIONID);
@@ -41,10 +43,10 @@ const handleInitialDials = async (req, res) => {
     MSG: MESSAGES.STAGE_ONE,
     MSGTYPE: true,
   };
-  return res.json(response);
+  res.json(response);
 };
 
-const handleSubsequentDials = async (req, res) => {
+const handleSubsequentDials = async (req: Request, res: Response) => {
   const { SESSIONID, USERID, MSISDN, USERDATA, NETWORK } = req.body;
 
   const response = {
@@ -61,7 +63,8 @@ const handleSubsequentDials = async (req, res) => {
   const validate = validateUserData(sessionData.data.length, USERDATA);
   if (validate.error) {
     await deleteSession(SESSIONID);
-    return res.json({ ...response, MSG: validate.message, MSGTYPE: false });
+    res.json({ ...response, MSG: validate.message, MSGTYPE: false });
+    return;
   }
   //update session data
   const updatedData = [...sessionData.data, USERDATA];
@@ -75,20 +78,20 @@ const handleSubsequentDials = async (req, res) => {
   switch (sessionData.data.length) {
     case 1: {
       const message = MESSAGES.STAGE_TWO;
-      return res.json({ ...response, MSG: message });
+      res.json({ ...response, MSG: message });
     }
     case 2: {
       const userOption = parseInt(USERDATA);
       const donationType = DONATION_TYPES[userOption - 1];
       const message = MESSAGES.STAGE_THREE(donationType);
-      return res.json({ ...response, MSG: message });
+      res.json({ ...response, MSG: message });
     }
     case 3: {
       const userOption = parseInt(sessionData.data[2]);
       const donationType = DONATION_TYPES[userOption - 1];
       const amount = USERDATA;
       const message = MESSAGES.STAGE_FOUR(donationType, amount);
-      return res.json({ ...response, MSG: message });
+      res.json({ ...response, MSG: message });
     }
     case 4: {
       const proceedWithPayment = USERDATA === "1";
@@ -111,15 +114,13 @@ const handleSubsequentDials = async (req, res) => {
           number: MSISDN,
           network: NETWORK,
         };
-        return await firePayment(paymentData);
+        await firePayment(paymentData);
       }
 
       break;
     }
     default:
       await deleteSession(SESSIONID);
-      return res.json({ ...response, MSGTYPE: false });
+      res.json({ ...response, MSGTYPE: false });
   }
 };
-
-module.exports = handleUSSDRequests;

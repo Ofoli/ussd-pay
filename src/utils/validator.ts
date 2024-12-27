@@ -6,7 +6,7 @@ const ERROR_MESSAGES = {
 const PASSED_RESPONSE = { error: false, message: "" };
 const FAILED_RESPONSE = { error: true, message: ERROR_MESSAGES.DEFAULT };
 
-function validateUserData(stage, data) {
+export function validateUserData(stage: number, data: string) {
   if (!data || !stage || stage < 1) return FAILED_RESPONSE;
 
   if (stage === 1) {
@@ -21,7 +21,6 @@ function validateUserData(stage, data) {
   return FAILED_RESPONSE;
 }
 
-const isValidLength = (str) => str.length >= 3;
-const isStringedNumber = (str) => !isNaN(str) && !isNaN(parseFloat(str));
-
-module.exports = validateUserData;
+const isValidLength = (str: string) => str.length >= 3;
+const isStringedNumber = (str: string) =>
+  !isNaN(parseInt(str)) && !isNaN(parseFloat(str));

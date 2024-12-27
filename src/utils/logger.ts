@@ -1,8 +1,8 @@
-const path = require("path");
-const fs = require("fs");
-const fsPromises = require("fs/promises");
+import path from "path";
+import fs from "fs";
+import fsPromises from "fs/promises";
 
-async function logger(message, filename) {
+export async function logger(message: string, filename: string) {
   const timeStamp = new Date().toISOString();
   const logMessage = `${timeStamp}\t${message}\n`;
   const dirPath = path.join(__dirname, "..", "..", "logs");
@@ -15,5 +15,3 @@ async function logger(message, filename) {
     console.log(err);
   }
 }
-
-module.exports = logger;
