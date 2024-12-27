@@ -1,13 +1,13 @@
-const fsPromises = require("fs/promises");
-const { SUCCESS_STATUS, FAILED_STATUS } = require("../data/constants");
-const {
+import fsPromises from "fs/promises";
+import { FAILED_STATUS } from "../config/constants";
+import {
   getSessionPath,
   findSession,
   persistSessionData,
   addSessionToDelete,
-} = require("../utils/sessions");
+} from "../utils/sessions";
 
-async function createSession(sessionId) {
+async function createSession(sessionId: string) {
   const timeStamp = JSON.stringify(new Date()).slice(1, 11);
   const key = `${sessionId}_${timeStamp}`;
   const sessionStorePath = getSessionPath(`${key}.txt`);
@@ -18,13 +18,13 @@ async function createSession(sessionId) {
   return response;
 }
 
-function getSession(sessionId) {
+function getSession(sessionId: string) {
   const sessionData = findSession(sessionId);
   if (sessionData.status === FAILED_STATUS) return sessionData;
   return sessionData.session;
 }
 
-async function updateSession(sessionData) {
+async function updateSession(sessionData: Record<string, string>) {
   const { sessionId } = sessionData;
   const findResponse = findSession(sessionId);
 
@@ -38,7 +38,7 @@ async function updateSession(sessionData) {
   );
   return updateResponse;
 }
-async function deleteSession(sessionId) {
+async function deleteSession(sessionId: string) {
   const sessionData = findSession(sessionId);
   if (sessionData.status === FAILED_STATUS) {
     await addSessionToDelete(sessionData.sessionFullPath);
@@ -47,4 +47,4 @@ async function deleteSession(sessionId) {
   await fsPromises.rm(sessionData.sessionFullPath);
 }
 
-module.exports = { createSession, getSession, updateSession, deleteSession };
+export { createSession, getSession, updateSession, deleteSession };

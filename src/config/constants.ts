@@ -7,7 +7,7 @@ const PAYMENT_CALLBACK_ENDPOINT = "/payment/callback";
 const SUCCESS_STATUS = "SUCCESS";
 const FAILED_STATUS = "FAILED";
 
-module.exports = {
+export {
   NALO_PAYMENT_URL,
   BASE_URL_DEV,
   BASE_URL_PROD,
