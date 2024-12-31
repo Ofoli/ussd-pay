@@ -4,14 +4,14 @@ import type {
   MenuResponse,
   UssdInputData,
 } from "./types";
-import { MemoryBaseSessionStore, BaseSessionStore } from "./store";
+import { BaseSessionStore, MemoryBasedSessionStore } from "./session-store";
 
 export class UssdSessionContext {
   private store: BaseSessionStore;
   private nextStageKey = "_next_stage";
   private data: UssdInputData | null = null;
 
-  constructor(sessionStore: BaseSessionStore = new MemoryBaseSessionStore()) {
+  constructor(sessionStore: BaseSessionStore = new MemoryBasedSessionStore()) {
     this.store = sessionStore;
   }
 

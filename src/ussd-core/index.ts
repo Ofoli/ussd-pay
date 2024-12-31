@@ -1,5 +1,5 @@
-import { UssdSessionContext } from "./session";
-import { StageHandlerMapping } from "./handler";
+import { UssdSessionContext } from "./session-context";
+import { StageHandlerMapping } from "./stage-handler";
 import type { UssdData } from "./types";
 
 class UssdCoreApp {
@@ -9,12 +9,9 @@ class UssdCoreApp {
     this.session = session;
   }
 
-  run<Q extends string | number | symbol>(
-    data: UssdData,
-    handlers: StageHandlerMapping<Q>
-  ) {
+  run(data: UssdData, handlers: StageHandlerMapping) {
     this.session.initialize(data);
-    const stage = this.session.nextStage() as Q;
+    const stage = this.session.nextStage();
     const handler = handlers.get(stage);
     const nextHandler = handler.getNext(this.session);
     const menu = nextHandler.getMenu(this.session);
