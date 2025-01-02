@@ -1,6 +1,6 @@
 import { StageHandler } from "../../ussd-core/stage-handler";
 import { UssdSessionContext } from "../../ussd-core/session-context";
-import { LastStage } from "./last";
+import { AmountStage } from "./amount";
 import { MESSAGES, CONTRIBUTION_TYPES } from "../constants";
 import { ErrorAlert } from "./error";
 import { isStringedNumber } from "../validator";
@@ -21,7 +21,7 @@ export class ContributionStage extends StageHandler {
 
     const contribution = CONTRIBUTION_TYPES[parseInt(contributionOption) - 1];
     session.update("contribution", contribution);
-    return new LastStage();
+    return new AmountStage();
   }
 
   isValidContributionOption(option: string): boolean {

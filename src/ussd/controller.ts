@@ -2,7 +2,7 @@ import { UssdApp } from "../ussd-core";
 import { StageHandlerMapping } from "../ussd-core/stage-handler";
 import { NameStage } from "./menus/name";
 import { AgeStage } from "./menus/contribution";
-import { LastStage } from "./menus/last";
+import { LastStage } from "./menus/amount";
 import type { UssdData } from "../ussd-core/types";
 import type { Request, Response } from "express";
 
