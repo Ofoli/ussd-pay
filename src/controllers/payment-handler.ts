@@ -3,7 +3,7 @@ import { NALO_PAYMENT_URL } from "../config/constants";
 import {
   generatePaymentPayload,
   formatCallbackResponse,
-} from "../utils/payment";
+} from "../payment/utils";
 import type { Request, Response } from "express";
 
 const Transaction = require("../models/transactions");

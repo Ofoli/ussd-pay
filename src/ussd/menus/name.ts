@@ -1,14 +1,14 @@
 import { StageHandler } from "../../ussd-core/stage-handler";
 import { UssdSessionContext } from "../../ussd-core/session-context";
-import { AgeStage } from "./age";
+import { ContributionStage } from "./contribution";
+import { MESSAGES } from "../constants";
 import type { MenuResponse } from "../../ussd-core/types";
 
 export class NameStage extends StageHandler {
   stage: string = "";
 
   getMenu(session: UssdSessionContext): MenuResponse {
-    const message = "Please enter your name";
-    return { message, continueSession: true };
+    return { message: MESSAGES.STAGE_ONE, continueSession: true };
   }
 
   getNext(session: UssdSessionContext): StageHandler {
@@ -18,6 +18,6 @@ export class NameStage extends StageHandler {
     const data = ussd.userData;
     session.update("name", data);
 
-    return new AgeStage();
+    return new ContributionStage();
   }
 }

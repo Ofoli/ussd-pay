@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
 import { USSD_ENPOINT, PAYMENT_CALLBACK_ENDPOINT } from "./config/constants";
-import { handleUSSDRequests } from "./controllers/ussd-handler";
+import { handleUSSDRequests } from "./ussd/ussd-handler";
 import { handlePaymentCallback } from "./controllers/payment-handler";
 import { connectDB } from "./config/db";
 import type { Request, Response, Express } from "express";

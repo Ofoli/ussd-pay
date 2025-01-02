@@ -1,6 +1,6 @@
 import { FAILED_STATUS } from "../config/constants";
-import { validateUserData } from "../utils/validator";
-import { firePayment } from "./payment-handler";
+import { validateUserData } from "./validator";
+import { firePayment } from "../controllers/payment-handler";
 import type { Request, Response } from "express";
 
 const {
