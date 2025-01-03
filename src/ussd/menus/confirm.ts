@@ -3,7 +3,7 @@ import { UssdSessionContext } from "../../ussd-core/session-context";
 import { MESSAGES } from "../constants";
 import { ErrorAlert } from "./error";
 import { PromptStage } from "./prompt";
-import { isStringedNumber } from "../validator";
+import { isStringedNumber } from "../utils";
 import type { MenuResponse } from "../../ussd-core/types";
 
 export class ConfirmStage extends StageHandler {
@@ -21,15 +21,12 @@ export class ConfirmStage extends StageHandler {
 
     if (userOption !== "1") return new ErrorAlert(MESSAGES.STAGE_FIVE.cancel);
 
-    const name = session.retrieve("name");
-    const amount = session.retrieve("amount");
-    const contribution = session.retrieve("contribution");
     const paymentData = {
-      amount,
-      name,
-      description: `Luxstek ${contribution} contribution`,
+      name: session.retrieve("name"),
+      amount: session.retrieve("amount"),
       number: session.getUssdData().msisdn,
       network: session.getUssdData().network,
+      description: `Luxstek ${session.retrieve("contribution")} contribution`,
     };
     if (this.firePayment(paymentData)) {
       return new PromptStage();

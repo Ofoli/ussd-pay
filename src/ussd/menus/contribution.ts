@@ -3,7 +3,7 @@ import { UssdSessionContext } from "../../ussd-core/session-context";
 import { AmountStage } from "./amount";
 import { MESSAGES, CONTRIBUTION_TYPES } from "../constants";
 import { ErrorAlert } from "./error";
-import { isStringedNumber } from "../validator";
+import { isStringedNumber } from "../utils";
 import type { MenuResponse } from "../../ussd-core/types";
 
 export class ContributionStage extends StageHandler {
