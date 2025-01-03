@@ -2,6 +2,7 @@ import { StageHandler } from "../../ussd-core/stage-handler";
 import { UssdSessionContext } from "../../ussd-core/session-context";
 import { MESSAGES } from "../constants";
 import { ErrorAlert } from "./error";
+import { ConfirmStage } from "./confirm";
 import { isStringedNumber } from "../validator";
 import type { MenuResponse } from "../../ussd-core/types";
 
@@ -21,7 +22,7 @@ export class AmountStage extends StageHandler {
       return new ErrorAlert("You entered an invalid input");
 
     session.update("amount", amount);
-    return this;
+    return new ConfirmStage();
   }
 
   isValidAmount(amount: string): boolean {

@@ -2,6 +2,7 @@ import { StageHandler } from "../../ussd-core/stage-handler";
 import { UssdSessionContext } from "../../ussd-core/session-context";
 import { MESSAGES } from "../constants";
 import { ErrorAlert } from "./error";
+import { PromptStage } from "./prompt";
 import { isStringedNumber } from "../validator";
 import type { MenuResponse } from "../../ussd-core/types";
 
@@ -31,7 +32,7 @@ export class ConfirmStage extends StageHandler {
       network: session.getUssdData().network,
     };
     if (this.firePayment(paymentData)) {
-      return this;
+      return new PromptStage();
     }
     return new ErrorAlert(MESSAGES.STAGE_FIVE.cancel);
   }
