@@ -1,5 +1,6 @@
 import { UssdSessionContext } from "./session-context";
 import { StageHandlerMapping } from "./stage-handler";
+import { FileBasedSessionStore } from "./session-store";
 import type { UssdData } from "./types";
 
 class UssdCoreApp {
@@ -21,5 +22,6 @@ class UssdCoreApp {
   }
 }
 
-const ussdContext = new UssdSessionContext();
+const sessionStore = new FileBasedSessionStore();
+const ussdContext = new UssdSessionContext(sessionStore);
 export const UssdApp = new UssdCoreApp(ussdContext);

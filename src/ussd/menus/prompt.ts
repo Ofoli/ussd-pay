@@ -1,20 +1,16 @@
 import { StageHandler } from "../../ussd-core/stage-handler";
 import { UssdSessionContext } from "../../ussd-core/session-context";
-import { LastStage } from "./last";
+import { MESSAGES } from "../constants";
 import type { MenuResponse } from "../../ussd-core/types";
 
-export class AgeStage extends StageHandler {
-  stage: string = "Age";
+export class PromptStage extends StageHandler {
+  stage: string = "prompt";
 
   getMenu(session: UssdSessionContext): MenuResponse {
-    const message = "Please enter your age";
-    return { message, continueSession: true };
+    return { message: MESSAGES.STAGE_FIVE.proceed, continueSession: false };
   }
 
   getNext(session: UssdSessionContext): StageHandler {
-    const age = session.getUssdData().userData;
-    session.update("age", age);
-
-    return new LastStage();
+    return this;
   }
 }
