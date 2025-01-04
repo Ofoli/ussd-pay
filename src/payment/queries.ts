@@ -5,8 +5,12 @@ import type { TransData, UpdateTransData } from "./types";
 
 export class Transaction {
   static async create(data: TransData) {
-    const [trans] = await db.insert(transactions).values(data).returning();
-    return trans;
+    try {
+      await db.insert(transactions).values(data);
+    } catch (err) {
+      const { message } = err as Error;
+      console.log({ action: "create-transaction", details: message, data });
+    }
   }
 
   static async retrieve(orderId: string) {

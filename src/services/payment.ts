@@ -3,7 +3,6 @@ import { Transaction } from "../payment/queries";
 import { NaloPaymentGateway } from "./gateway";
 import { Request, type SuccessResponse } from "../utils/request";
 import type { PaymentData, Gateway } from "../payment/types";
-import { taskQueue } from "./queue";
 
 export abstract class PaymentService {
   gateway: Gateway;
@@ -11,13 +10,9 @@ export abstract class PaymentService {
   constructor(gateway: Gateway) {
     this.gateway = gateway;
   }
-  protected generateOrderId(): string {
+  generateOrderId(): string {
     return randomUUID();
   }
-  protected abstract generatePaymentPayload(
-    data: PaymentData,
-    orderId: string
-  ): Record<string, string | number | boolean>;
 
   public abstract pay(data: PaymentData): void;
 }
@@ -47,7 +42,7 @@ export class NaloPaymentService extends PaymentService {
     return secrete;
   };
 
-  protected generatePaymentPayload = (data: PaymentData) => {
+  generatePaymentPayload = (data: PaymentData) => {
     const key = this.generateKey();
     return {
       key,
@@ -65,28 +60,31 @@ export class NaloPaymentService extends PaymentService {
     };
   };
 
-  private async makePayment(data: PaymentData) {
+  async makePayment(data: PaymentData) {
     const payload = this.generatePaymentPayload(data);
     const response = await Request.post(this.gateway.url, payload);
 
-    if (!response.status || response.data.Status) {
+    if (!response.status || typeof response.data === "string") {
       //log error
-      console.log({ response });
+      console.log({ action: "make-payment", details: response, data });
       return;
     }
+
     const { data: naloData } = response as SuccessResponse;
-    await Transaction.create({
-      ...data,
-      orderId: naloData.Order_id as string,
-      invoice: naloData.InvoiceNo as string,
-    });
+
+    try {
+      await Transaction.create({
+        ...data,
+        orderId: naloData.Order_id as string,
+        invoice: naloData.InvoiceNo as string,
+      });
+    } catch (err) {
+      const { message } = err as Error;
+      console.log({ action: "create-transaction", details: message, data });
+    }
   }
 
   public pay(data: PaymentData) {
-    taskQueue.enqueue({
-      method: this.makePayment,
-      params: [data],
-      delay: 5000,
-    });
+    setTimeout(() => this.makePayment(data), 5000);
   }
 }

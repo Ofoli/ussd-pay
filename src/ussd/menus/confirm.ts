@@ -5,7 +5,6 @@ import { ErrorAlert } from "./error";
 import { PromptStage } from "./prompt";
 import { isStringedNumber } from "../utils";
 import { PaymentService, NaloPaymentService } from "../../services/payment";
-import { taskQueue } from "../../services/queue";
 import type { MenuResponse } from "../../ussd-core/types";
 import { PaymentData } from "../../payment/types";
 
