@@ -1,10 +1,10 @@
 import { db } from "../db/index";
 import { eq, and, sql } from "drizzle-orm";
 import { transactions } from "../db/schema";
-import type { PaymentData, UpdateTransData } from "./types";
+import type { TransData, UpdateTransData } from "./types";
 
 export class Transaction {
-  static async create(data: PaymentData) {
+  static async create(data: TransData) {
     const [trans] = await db.insert(transactions).values(data).returning();
     return trans;
   }

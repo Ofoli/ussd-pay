@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "78c9de62-1e4c-4955-a52c-cc8037a4cd40",
+  "id": "2164a877-bb09-448c-8990-00f73f859b0b",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "transactions": {
@@ -47,8 +47,7 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "'jz0wFZaETBSqZrOxoa10G'"
+          "autoincrement": false
         },
         "status": {
           "name": "status",

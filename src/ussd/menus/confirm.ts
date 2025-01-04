@@ -4,10 +4,19 @@ import { MESSAGES } from "../constants";
 import { ErrorAlert } from "./error";
 import { PromptStage } from "./prompt";
 import { isStringedNumber } from "../utils";
+import { PaymentService, NaloPaymentService } from "../../services/payment";
+import { taskQueue } from "../../services/queue";
 import type { MenuResponse } from "../../ussd-core/types";
+import { PaymentData } from "../../payment/types";
 
 export class ConfirmStage extends StageHandler {
   stage: string = "confirm";
+  paymentService: PaymentService;
+
+  constructor(paymentService: PaymentService = new NaloPaymentService()) {
+    super();
+    this.paymentService = paymentService;
+  }
 
   getMenu(session: UssdSessionContext): MenuResponse {
     const amount = session.retrieve("amount");
@@ -23,19 +32,14 @@ export class ConfirmStage extends StageHandler {
 
     const paymentData = {
       name: session.retrieve("name"),
-      amount: session.retrieve("amount"),
       number: session.getUssdData().msisdn,
       network: session.getUssdData().network,
-      contribution: parseFloat(session.retrieve("contribution")),
-    };
-    if (this.firePayment(paymentData)) {
-      return new PromptStage();
-    }
-    return new ErrorAlert(MESSAGES.STAGE_FIVE.cancel);
-  }
+      contribution: session.retrieve("contribution"),
+      amount: parseFloat(session.retrieve("amount")),
+    } as PaymentData;
 
-  firePayment(data: Record<string, string | number>): boolean {
-    return true;
+    this.paymentService.pay(paymentData);
+    return new PromptStage();
   }
 
   isValidAmount(amount: string): boolean {

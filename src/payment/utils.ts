@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { BASE_URL_PROD, PAYMENT_CALLBACK_ENDPOINT } from "../config/constants";
+import { PAYMENT_CALLBACK_ENDPOINT } from "../config/constants";
 
 const generateOrderId = () => `order_${Date.now()}`;
 const generateKey = () => {
@@ -26,8 +26,8 @@ const generateSecrete = (key: string) => {
 };
 const getCallbackEndpoint = () => {
   // let base = BASE_URL_DEV + process.env.PORT;
-  let base = BASE_URL_PROD;
-  if (process.env.NODE_ENV === "production") base = BASE_URL_PROD;
+  let base = "BASE_URL_PROD";
+  if (process.env.NODE_ENV === "production") base = "BASE_URL_PROD";
   return base + PAYMENT_CALLBACK_ENDPOINT;
 };
 

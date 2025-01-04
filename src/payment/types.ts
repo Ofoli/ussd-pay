@@ -8,9 +8,9 @@ export type PaymentData = {
   contribution: (typeof CONTRIBUTION_TYPES)[number];
 };
 
-export type TransData = Omit<PaymentData, "network"> & {
-  orderId?: string;
-  invoice?: string;
+export type TransData = PaymentData & {
+  orderId: string;
+  invoice: string;
   status?: (typeof STATUSES)[number];
   createdAt?: string;
   updatedAt?: string;

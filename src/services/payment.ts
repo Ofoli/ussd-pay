@@ -1,8 +1,9 @@
-import crypto from "crypto";
+import crypto, { randomUUID } from "crypto";
 import { Transaction } from "../payment/queries";
 import { NaloPaymentGateway } from "./gateway";
 import { Request, type SuccessResponse } from "../utils/request";
 import type { PaymentData, Gateway } from "../payment/types";
+import { taskQueue } from "./queue";
 
 export abstract class PaymentService {
   gateway: Gateway;
@@ -10,7 +11,9 @@ export abstract class PaymentService {
   constructor(gateway: Gateway) {
     this.gateway = gateway;
   }
-
+  protected generateOrderId(): string {
+    return randomUUID();
+  }
   protected abstract generatePaymentPayload(
     data: PaymentData,
     orderId: string
@@ -44,16 +47,16 @@ export class NaloPaymentService extends PaymentService {
     return secrete;
   };
 
-  protected generatePaymentPayload = (data: PaymentData, orderId: string) => {
+  protected generatePaymentPayload = (data: PaymentData) => {
     const key = this.generateKey();
     return {
       key,
-      orderId,
       isussd: true,
+      amount: data.amount,
       payby: data.network,
       customerName: data.name,
       customerNumber: data.number,
-      amount: data.amount,
+      orderId: this.generateOrderId(),
       secrete: this.generateSecrete(key),
       merchant_id: this.gateway.merchant,
       callback: this.gateway.callbackUrl,
@@ -62,19 +65,28 @@ export class NaloPaymentService extends PaymentService {
     };
   };
 
-  public async pay(data: PaymentData) {
-    const trans = await Transaction.create(data);
-    const payload = this.generatePaymentPayload(data, trans.orderId);
+  private async makePayment(data: PaymentData) {
+    const payload = this.generatePaymentPayload(data);
     const response = await Request.post(this.gateway.url, payload);
 
     if (!response.status || response.data.Status) {
       //log error
+      console.log({ response });
       return;
     }
     const { data: naloData } = response as SuccessResponse;
-    await Transaction.update({
+    await Transaction.create({
+      ...data,
+      orderId: naloData.Order_id as string,
       invoice: naloData.InvoiceNo as string,
-      orderId: trans.orderId,
+    });
+  }
+
+  public pay(data: PaymentData) {
+    taskQueue.enqueue({
+      method: this.makePayment,
+      params: [data],
+      delay: 5000,
     });
   }
 }
