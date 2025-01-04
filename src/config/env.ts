@@ -26,6 +26,12 @@ export const config = {
     paymentCallback: PAYMENT_CALLBACK_ENDPOINT,
   },
   payment: {
-    naloUrl: NALO_PAYMENT_URL,
+    nalo: {
+      url: NALO_PAYMENT_URL,
+      merchant: process.env.MERCHANT_ID!,
+      username: process.env.MERCHANT_USERNAME!,
+      password: process.env.MERCHANT_PASSWORD!,
+      callbackUrl: process.env.NALO_PAYMENT_CALLBACK!,
+    },
   },
 };

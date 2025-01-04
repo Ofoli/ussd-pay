@@ -26,7 +26,7 @@ export class ConfirmStage extends StageHandler {
       amount: session.retrieve("amount"),
       number: session.getUssdData().msisdn,
       network: session.getUssdData().network,
-      description: `Luxstek ${session.retrieve("contribution")} contribution`,
+      contribution: parseFloat(session.retrieve("contribution")),
     };
     if (this.firePayment(paymentData)) {
       return new PromptStage();
@@ -34,7 +34,7 @@ export class ConfirmStage extends StageHandler {
     return new ErrorAlert(MESSAGES.STAGE_FIVE.cancel);
   }
 
-  firePayment(data: Record<string, string>): boolean {
+  firePayment(data: Record<string, string | number>): boolean {
     return true;
   }
 

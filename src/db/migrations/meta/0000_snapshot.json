@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "aea178de-bdca-46d7-b964-1c23af66a339",
+  "id": "78c9de62-1e4c-4955-a52c-cc8037a4cd40",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "transactions": {
@@ -21,6 +21,20 @@
           "notNull": false,
           "autoincrement": false
         },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "number": {
+          "name": "number",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
         "amount": {
           "name": "amount",
           "type": "real",
@@ -33,20 +47,14 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false
-        },
-        "customer_number": {
-          "name": "customer_number",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "autoincrement": false,
+          "default": "'jz0wFZaETBSqZrOxoa10G'"
         },
         "status": {
           "name": "status",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false,
           "default": "'Pending'"
         },
@@ -54,7 +62,7 @@
           "name": "created_at",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false,
           "default": "(CURRENT_TIMESTAMP)"
         },
@@ -62,7 +70,7 @@
           "name": "updated_at",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false,
           "default": "(CURRENT_TIMESTAMP)"
         },
