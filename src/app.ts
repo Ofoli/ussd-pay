@@ -1,28 +1,20 @@
-import dotenv from "dotenv";
-import express from "express";
-import mongoose from "mongoose";
-import { USSD_ENPOINT, PAYMENT_CALLBACK_ENDPOINT } from "./config/constants";
-import { handlePaymentCallback } from "./controllers/payment-handler";
-import { connectDB } from "./config/db";
+import express, { Request, Response, Express } from "express";
 import { handleUssdRequests } from "./ussd/controller";
-import type { Request, Response, Express } from "express";
+import { handleNaloPaymentCallback } from "./payment/controller";
+import { config } from "./config/env";
 
-const port = process.env.PORT || 8000;
 const app: Express = express();
+const port = config.app.port || 8000;
 
-dotenv.config();
 app.use(express.json());
-connectDB();
 
 app.get("/", (req: Request, res: Response) => {
   res.json({ message: "App is working" });
 });
 
-app.post(USSD_ENPOINT, handleUssdRequests);
-app.post(PAYMENT_CALLBACK_ENDPOINT, handlePaymentCallback);
+app.post(config.endpoints.ussd, handleUssdRequests);
+app.post(config.endpoints.paymentCallback, handleNaloPaymentCallback);
 
-mongoose.connection.once("open", () => {
-  app.listen(port, () => {
-    console.log(`Started USSD app on port ${port}`);
-  });
+app.listen(port, () => {
+  console.log(`Started USSD app on port ${port}`);
 });

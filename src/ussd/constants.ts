@@ -1,10 +1,9 @@
-export const DONATION_TYPES = ["offering", "tithe", "thanksgiving", "donation"];
 export const CONTRIBUTION_TYPES = [
   "offering",
   "tithe",
   "thanksgiving",
   "donation",
-];
+] as const;
 export const MESSAGES = {
   STAGE_ONE: "Welcome to luxstek payment collector.\nPlease enter your name",
   STAGE_TWO:

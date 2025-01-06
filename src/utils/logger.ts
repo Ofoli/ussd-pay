@@ -1,17 +1,20 @@
-import path from "path";
-import fs from "fs";
-import fsPromises from "fs/promises";
+import winston from "winston";
+import { config } from "../config/env";
 
-export async function logger(message: string, filename: string) {
-  const timeStamp = new Date().toISOString();
-  const logMessage = `${timeStamp}\t${message}\n`;
-  const dirPath = path.join(__dirname, "..", "..", "logs");
-  const logPath = path.join(dirPath, filename);
+const { timestamp, printf, combine } = winston.format;
+const formatter = (log: winston.Logform.TransformableInfo) =>
+  `${log.timestamp} - ${log.level.toUpperCase()} - ${JSON.stringify(
+    log.message
+  )}`;
 
-  try {
-    if (!fs.existsSync(dirPath)) await fsPromises.mkdir(dirPath);
-    await fsPromises.appendFile(logPath, logMessage);
-  } catch (err) {
-    console.log(err);
-  }
-}
+export const logger = winston.createLogger({
+  level: "info",
+  format: combine(
+    timestamp({ format: "YYYY-MM-DD HH:mm:ss.SSS" }),
+    printf(formatter)
+  ),
+  transports: [
+    new winston.transports.Console(),
+    new winston.transports.File({ filename: config.app.logs.default }),
+  ],
+});
