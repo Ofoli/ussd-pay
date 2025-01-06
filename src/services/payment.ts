@@ -3,14 +3,10 @@ import { Transaction } from "../payment/queries";
 import { NaloPaymentGateway } from "./gateway";
 import { logger } from "../utils/logger";
 import { Request } from "../utils/request";
-import type { PaymentData, Gateway } from "../payment/types";
+import type { PaymentData, Gateway, NaloResponse } from "../payment/types";
 import winston from "winston";
+import { STATUSES } from "../payment/constants";
 
-type NaloResponse = {
-  Status: string;
-  Order_id: string;
-  InvoiceNo: string;
-};
 export abstract class PaymentService {
   protected readonly gateway: Gateway;
   protected readonly logger: winston.Logger = logger;
@@ -59,7 +55,7 @@ export class NaloPaymentService extends PaymentService {
       payby: data.network,
       customerName: data.name,
       customerNumber: data.number,
-      orderId: this.generateOrderId(),
+      order_id: this.generateOrderId(),
       secrete: this.generateSecrete(key),
       merchant_id: this.gateway.merchant,
       callback: this.gateway.callbackUrl,
@@ -87,7 +83,7 @@ export class NaloPaymentService extends PaymentService {
     const response = await Request.post(this.gateway.url, payload);
 
     if (!response.status || typeof response.data === "string") {
-      const data = { amount: payload.amount, orderId: payload.orderId };
+      const data = { amount: payload.amount, orderId: payload.order_id };
       this.logger.error({
         action: "call-payment-api",
         details: response,
@@ -101,5 +97,18 @@ export class NaloPaymentService extends PaymentService {
 
   public pay(data: PaymentData) {
     setTimeout(() => this.makePayment(data), 5000);
+  }
+
+  public async processCallback(data: NaloResponse) {
+    const trans = await Transaction.retrieve(data.Order_id);
+    if (!trans) return { status: 404, message: "Transaction Not Found" };
+
+    await Transaction.update({
+      invoice: data.InvoiceNo,
+      orderId: data.Order_id,
+      status: data.Status === "PAID" ? STATUSES[2] : STATUSES[1],
+    });
+
+    return { status: 200, message: "ok" };
   }
 }

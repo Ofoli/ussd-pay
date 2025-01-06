@@ -1,6 +1,6 @@
 import express, { Request, Response, Express } from "express";
-// import { handlePaymentCallback } from "./controllers/payment-handler";
 import { handleUssdRequests } from "./ussd/controller";
+import { handleNaloPaymentCallback } from "./payment/controller";
 import { config } from "./config/env";
 
 const app: Express = express();
@@ -13,7 +13,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.post(config.endpoints.ussd, handleUssdRequests);
-// app.post(config.endpoints.paymentCallback, handlePaymentCallback);
+app.post(config.endpoints.paymentCallback, handleNaloPaymentCallback);
 
 app.listen(port, () => {
   console.log(`Started USSD app on port ${port}`);

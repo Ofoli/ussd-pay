@@ -5,36 +5,49 @@ import { logger } from "../utils/logger";
 import type { TransData, UpdateTransData } from "./types";
 
 export class Transaction {
-  static async create(data: TransData) {
+  static async query<R>(query: Promise<R>) {
     try {
-      await db.insert(transactions).values(data);
+      return await query;
     } catch (err) {
       const { message } = err as Error;
-      logger.error({ action: "create-transaction", details: message, data });
+      logger.error({
+        action: "query-transaction-model",
+        details: message,
+      });
     }
+  }
+  static async create(data: TransData) {
+    await Transaction.query(db.insert(transactions).values(data));
   }
 
   static async retrieve(orderId: string) {
-    return await db
-      .select()
-      .from(transactions)
-      .where(
-        and(
-          eq(transactions.status, "Pending"),
-          eq(transactions.orderId, orderId)
+    const trans = await Transaction.query(
+      db
+        .select()
+        .from(transactions)
+        .where(
+          and(
+            eq(transactions.status, "Pending"),
+            eq(transactions.orderId, orderId)
+          )
         )
-      );
+    );
+
+    if (!trans || trans.length === 0) return null;
+    return trans.pop();
   }
 
   static async update(data: UpdateTransData) {
-    await db
-      .update(transactions)
-      .set({ ...data, updatedAt: sql`(CURRENT_TIMESTAMP)` })
-      .where(
-        and(
-          eq(transactions.status, "Pending"),
-          eq(transactions.orderId, data.orderId)
+    await Transaction.query(
+      db
+        .update(transactions)
+        .set({ ...data, updatedAt: sql`(CURRENT_TIMESTAMP)` })
+        .where(
+          and(
+            eq(transactions.status, "Pending"),
+            eq(transactions.orderId, data.orderId)
+          )
         )
-      );
+    );
   }
 }

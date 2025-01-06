@@ -19,7 +19,7 @@ export type TransData = PaymentData & {
 export type UpdateTransData = {
   invoice: string;
   orderId: string;
-  status?: (typeof STATUSES)[number];
+  status: (typeof STATUSES)[number];
 };
 
 export type Gateway = {
@@ -28,4 +28,10 @@ export type Gateway = {
   username: string;
   password: string;
   callbackUrl: string;
+};
+
+export type NaloResponse = {
+  Status: string;
+  Order_id: string;
+  InvoiceNo: string;
 };
