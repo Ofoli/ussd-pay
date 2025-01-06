@@ -7,6 +7,7 @@ import {
   DB_MIGRATION_DIR,
   DB_SCHEMA_PATH,
   ENV_FILE_PATH,
+  APP_LOG_PATH,
 } from "./constants";
 
 dotenv.config({ path: ENV_FILE_PATH });
@@ -15,6 +16,9 @@ export const config = {
   app: {
     baseUrl: BASE_URL,
     port: process.env.PORT,
+    logs: {
+      default: APP_LOG_PATH,
+    },
   },
   db: {
     url: "sqlite.db",

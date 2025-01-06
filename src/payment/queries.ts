@@ -1,6 +1,7 @@
 import { db } from "../db/index";
 import { eq, and, sql } from "drizzle-orm";
 import { transactions } from "../db/schema";
+import { logger } from "../utils/logger";
 import type { TransData, UpdateTransData } from "./types";
 
 export class Transaction {
@@ -9,7 +10,7 @@ export class Transaction {
       await db.insert(transactions).values(data);
     } catch (err) {
       const { message } = err as Error;
-      console.log({ action: "create-transaction", details: message, data });
+      logger.error({ action: "create-transaction", details: message, data });
     }
   }
 

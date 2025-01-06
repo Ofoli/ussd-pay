@@ -1,16 +1,24 @@
 import crypto, { randomUUID } from "crypto";
 import { Transaction } from "../payment/queries";
 import { NaloPaymentGateway } from "./gateway";
-import { Request, type SuccessResponse } from "../utils/request";
+import { logger } from "../utils/logger";
+import { Request } from "../utils/request";
 import type { PaymentData, Gateway } from "../payment/types";
+import winston from "winston";
 
+type NaloResponse = {
+  Status: string;
+  Order_id: string;
+  InvoiceNo: string;
+};
 export abstract class PaymentService {
-  gateway: Gateway;
+  protected readonly gateway: Gateway;
+  protected readonly logger: winston.Logger = logger;
 
   constructor(gateway: Gateway) {
     this.gateway = gateway;
   }
-  generateOrderId(): string {
+  protected generateOrderId(): string {
     return randomUUID();
   }
 
@@ -42,7 +50,7 @@ export class NaloPaymentService extends PaymentService {
     return secrete;
   };
 
-  generatePaymentPayload = (data: PaymentData) => {
+  private generatePaymentPayload = (data: PaymentData) => {
     const key = this.generateKey();
     return {
       key,
@@ -60,28 +68,35 @@ export class NaloPaymentService extends PaymentService {
     };
   };
 
-  async makePayment(data: PaymentData) {
+  private async makePayment(data: PaymentData) {
     const payload = this.generatePaymentPayload(data);
+    const response = await this.callNaloApi(payload);
+
+    if (!response) return;
+
+    await Transaction.create({
+      ...data,
+      orderId: response.Order_id,
+      invoice: response.InvoiceNo,
+    });
+  }
+
+  private async callNaloApi(
+    payload: ReturnType<NaloPaymentService["generatePaymentPayload"]>
+  ): Promise<NaloResponse | null> {
     const response = await Request.post(this.gateway.url, payload);
 
     if (!response.status || typeof response.data === "string") {
-      //log error
-      console.log({ action: "make-payment", details: response, data });
-      return;
-    }
-
-    const { data: naloData } = response as SuccessResponse;
-
-    try {
-      await Transaction.create({
-        ...data,
-        orderId: naloData.Order_id as string,
-        invoice: naloData.InvoiceNo as string,
+      const data = { amount: payload.amount, orderId: payload.orderId };
+      this.logger.error({
+        action: "call-payment-api",
+        details: response,
+        data,
       });
-    } catch (err) {
-      const { message } = err as Error;
-      console.log({ action: "create-transaction", details: message, data });
+      return null;
     }
+
+    return response.data as NaloResponse;
   }
 
   public pay(data: PaymentData) {
